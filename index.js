@@ -28,31 +28,35 @@ db.serialize(() => {
 
   db.get("SELECT COUNT(*) as count FROM movies", (err, row) => {
     if (row.count === 0) {
+      db.run("BEGIN TRANSACTION");
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 1985, 1985, 1985]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 1955, 1955, 1985]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 2015, 2015, 1985]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Gladiator", 180, 192, 2000]);
-      db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["The Time Machine", 802701, 802701, 1960]);
-      console.log("Inserted initial data with year ranges");
-      db.all("SELECT * FROM movies", [], (err, rows) => {
-        console.log('Database content after seeding:', rows);
+      db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["The Time Machine", 802701, 802701, 1960], () => {
+        db.run("COMMIT", () => {
+          console.log("Inserted initial data with year ranges");
+          db.all("SELECT * FROM movies", [], (err, rows) => {
+            console.log('Database content after seeding:', rows);
+          });
+        });
       });
     }
   });
+});
 
-  app.get('/', (req, res) => {
-    console.log('Received request for /');
-    res.send('Hello from timeline_backend');
-  });
+app.get('/', (req, res) => {
+  console.log('Received request for /');
+  res.send('Hello from timeline_backend');
+});
 
-  app.get('/movies', (req, res) => {
-    console.log('Received request for /movies');
-    db.all("SELECT * FROM movies", [], (err, rows) => {
-      console.log('Query error:', err);
-      console.log('Rows:', rows);
-      if (err) res.status(500).json({ error: err.message });
-      else res.json(rows);
-    });
+app.get('/movies', (req, res) => {
+  console.log('Received request for /movies');
+  db.all("SELECT * FROM movies", [], (err, rows) => {
+    console.log('Query error:', err);
+    console.log('Rows:', rows);
+    if (err) res.status(500).json({ error: err.message });
+    else res.json(rows);
   });
 });
 
