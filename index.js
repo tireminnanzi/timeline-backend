@@ -40,7 +40,6 @@ db.serialize(() => {
     }
   });
 
-  // Define routes here
   app.get('/', (req, res) => {
     console.log('Received request for /');
     res.send('Hello from timeline_backend');
