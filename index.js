@@ -12,7 +12,6 @@ const db = new sqlite3.Database('./movies.db', (err) => {
   else console.log('Connected to SQLite');
 });
 
-// Drop old table and create new one with year ranges
 db.serialize(() => {
   db.run("DROP TABLE IF EXISTS movies");
   db.run(`
@@ -25,16 +24,12 @@ db.serialize(() => {
     )
   `);
 
-  // Seed with updated data (ranges and multiple entries for some movies)
   db.get("SELECT COUNT(*) as count FROM movies", (err, row) => {
     if (row.count === 0) {
-      // Back to the Future (multiple ranges)
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 1985, 1985, 1985]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 1955, 1955, 1985]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Back to the Future", 2015, 2015, 1985]);
-      // Gladiator (range for Commodus' reign)
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Gladiator", 180, 192, 2000]);
-      // The Time Machine (single year)
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["The Time Machine", 802701, 802701, 1960]);
       console.log("Inserted initial data with year ranges");
     }
@@ -46,27 +41,16 @@ app.get('/', (req, res) => {
   res.send('Hello from timeline_backend');
 });
 
-//app.get('/movies', (req, res) => {
-//  console.log('Received request for /movies');
-//  db.all("SELECT * FROM movies", [], (err, rows) => {
-//    console.log('Query error:', err);
-//    console.log('Rows:', rows);
-//    if (err) res.status(500).json({ error: err.message });
-//    else res.json(rows);
-//  });
-//});
-// API endpoint to get all movies
-//app.get('/movies', (req, res) => {
-//  db.all("SELECT * FROM movies", [], (err, rows) => {
-//    if (err) res.status(500).json({ error: err.message });
-//    else res.json(rows);
-//  });
-// });
+app.get('/movies', (req, res) => {
+  console.log('Received request for /movies');
+  db.all("SELECT * FROM movies", [], (err, rows) => {
+    console.log('Query error:', err);
+    console.log('Rows:', rows);
+    if (err) res.status(500).json({ error: err.message });
+    else res.json(rows);
+  });
+});
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
-
-//app.listen(port, () => {
-//  console.log(`Server running on port ${port}`);
-//});
