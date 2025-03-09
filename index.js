@@ -7,6 +7,8 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+console.log('Starting server setup...');
+
 const db = new sqlite3.Database('./movies.db', (err) => {
   if (err) console.error('Database error:', err);
   else console.log('Connected to SQLite');
@@ -32,6 +34,10 @@ db.serialize(() => {
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["Gladiator", 180, 192, 2000]);
       db.run("INSERT INTO movies (title, yearStart, yearEnd, releaseYear) VALUES (?, ?, ?, ?)", ["The Time Machine", 802701, 802701, 1960]);
       console.log("Inserted initial data with year ranges");
+      // Verify data after insertion
+      db.all("SELECT * FROM movies", [], (err, rows) => {
+        console.log('Database content after seeding:', rows);
+      });
     }
   });
 });
